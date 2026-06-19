@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Steam WebOS Bootloader</title>
+    <style>
+        @font-face {
+            font-family: 'Terminus';
+            src: url('fonts/TerminusTTF-Bold.ttf') format('truetype');
+            font-weight: bold;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #9b51e0;
+            font-family: 'Terminus', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .boot-box {
+            border: 2px solid #512d6d;
+            padding: 30px;
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 6px;
+            box-shadow: 0 0 20px rgba(155, 81, 224, 0.2);
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .status-text {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .dots::after {
+            content: '';
+            animation: blink 1.5s infinite step-start;
+        }
+
+        @keyframes blink {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="boot-box">
+        <div style="font-size: 16px; font-weight: bold;">[ STEAM WEBOS BOOTLOADER ]</div>
+        <div id="status" class="status-text">Инициализация запуска<span class="dots"></span></div>
+    </div>
+
+    <script>
+        // Функция автоматического выполнения команды при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            const statusDiv = document.getElementById('status');
+            
+            // Задержка в полсекунды, чтобы юзер успел увидеть красивую анимацию загрузки
+            setTimeout(() => {
+                statusDiv.innerText = "Отправка поручения бэкенду...";
+                
+                // Шлем запрос на запуск нашей мини-ОС (команда запускает, например, terminal.html или логику скрипта)
+                fetch('/run?cmd=start_os')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            statusDiv.innerHTML = '<span style="color: #55ff55;">[УСПЕХ] Мини-ОС успешно запущена!</span>';
+                        } else {
+                            statusDiv.innerHTML = `<span style="color: #ff5555;">[ОШИБКА БЭКЕНДА]: ${data.message}</span>`;
+                        }
+                    })
+                    .catch(err => {
+                        statusDiv.innerHTML = '<span style="color: #ff5555;">[ОШИБКА СВЯЗИ]: Фоновый скрипт не ответил.</span>';
+                    });
+            }, 600);
+        });
+    </script>
+</body>
+</html>
